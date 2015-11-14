@@ -39,8 +39,36 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Internals\AbsolutePixelIdentifier.cs" />
+    <Compile Include="Internals\AverageConverter.cs" />
+    <Compile Include="Internals\BitmapGeneratorBase.cs" />
+    <Compile Include="Internals\BlackWhiteConverterBase.cs" />
+    <Compile Include="Internals\Character.cs" />
+    <Compile Include="Internals\CharacterBitmapGenerator.cs" />
+    <Compile Include="Internals\CharactersRatioCaculator.cs" />
+    <Compile Include="Internals\CharacterSubstitutionBuilder.cs" />
+    <Compile Include="Internals\FileFormatterBase.cs" />
+    <Compile Include="Internals\FontSet.cs" />
+    <Compile Include="Internals\IBitmapConverter.cs" />
+    <Compile Include="Internals\IBitmapGenerator.cs" />
+    <Compile Include="Internals\ICharacterRatioCalculator.cs" />
+    <Compile Include="Internals\IPixelIdentifier.cs" />
+    <Compile Include="Internals\IRatioCalculator.cs" />
+    <Compile Include="Internals\ISubstitutionTable.cs" />
+    <Compile Include="Internals\ISubstitutionTableBuilder.cs" />
+    <Compile Include="Internals\ITiledImage.cs" />
+    <Compile Include="Internals\LuminosityConverter.cs" />
+    <Compile Include="PixelationManager.cs" />
+    <Compile Include="Internals\Pixelator.cs" />
+    <Compile Include="Internals\PixelatorBase.cs" />
+    <Compile Include="Internals\PixelIdentifierBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Internals\ShadeSubstitutionAcceptance.cs" />
+    <Compile Include="Internals\SubstitutionItem.cs" />
+    <Compile Include="Internals\SubstitutionTable.cs" />
+    <Compile Include="Internals\TiledImage.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
