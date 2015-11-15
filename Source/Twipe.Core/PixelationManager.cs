@@ -41,9 +41,9 @@ namespace Twipe.Core
         public async Task<ITiledImage<T>> ProcessAsync()
         {
             Task tableTask = CreateTable();
-            Task convertionTask = ConvertImage();
+            Task conversionTask = ConvertImage();
 
-            await Task.WhenAll(tableTask, convertionTask);
+            await Task.WhenAll(tableTask, conversionTask);
             pixelator.InputImage = converter.Result;
             pixelator.SubstitutionTable = table;
             pixelator.TileSize = tileSize;

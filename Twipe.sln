@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Unit Tests", "Unit Tests", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Twipe.Core", "Source\Twipe.Core\Twipe.Core.csproj", "{44CB7103-B574-4EEB-8827-52050858EC75}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Twipe.UI", "Source\Twipe.UI\Twipe.UI.csproj", "{72953DF1-3BB6-420F-B2C1-466828D62F17}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,11 +21,16 @@ Global
 		{44CB7103-B574-4EEB-8827-52050858EC75}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44CB7103-B574-4EEB-8827-52050858EC75}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{44CB7103-B574-4EEB-8827-52050858EC75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72953DF1-3BB6-420F-B2C1-466828D62F17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72953DF1-3BB6-420F-B2C1-466828D62F17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72953DF1-3BB6-420F-B2C1-466828D62F17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72953DF1-3BB6-420F-B2C1-466828D62F17}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{44CB7103-B574-4EEB-8827-52050858EC75} = {6503C398-C823-41AC-BF3D-09799306623C}
+		{72953DF1-3BB6-420F-B2C1-466828D62F17} = {6503C398-C823-41AC-BF3D-09799306623C}
 	EndGlobalSection
 EndGlobal

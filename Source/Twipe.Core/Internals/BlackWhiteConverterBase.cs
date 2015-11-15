@@ -20,16 +20,16 @@ namespace Twipe.Core.Internals
 
         public virtual async Task<Bitmap> ConvertAsync()
         {
-            Task<Bitmap> convertionTask = Task.Factory.StartNew<Bitmap>(DoConvertion);
+            Task<Bitmap> conversionTask = Task.Factory.StartNew<Bitmap>(DoConversion);
 
-            Bitmap result = await convertionTask;
+            Bitmap result = await conversionTask;
 
             result.Save(System.IO.Path.GetTempPath() + "\\temp_bw_image.jpg");
 
             return result;
         }
 
-        protected virtual Bitmap DoConvertion()
+        protected virtual Bitmap DoConversion()
         {
             result = new Bitmap(input.Width, input.Height);
             Color pixel;
