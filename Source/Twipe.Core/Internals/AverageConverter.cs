@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 
 namespace Twipe.Core.Internals
 {
@@ -12,6 +13,11 @@ namespace Twipe.Core.Internals
         protected override int GetAverageValue(Color pixel)
         {
             return (pixel.R + pixel.G + pixel.B) / 3;
+        }
+
+        protected override int GetAverageValue(int red, int green, int blue)
+        {
+            return (red + green + blue) / 3;
         }
     }
 }

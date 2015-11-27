@@ -1,6 +1,7 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Twipe.Core.Internals
@@ -13,12 +14,22 @@ namespace Twipe.Core.Internals
         private int heightInPixels;
         private int widthInBytes;
         private Bitmap[,] charImages;
+        private StringBuilder sb;
+        private Dictionary<int, Bitmap> tileCache;
+        private Brush blackBrush;
+        private Brush whiteBrush;
+        private int tileSize;
 
         private unsafe byte* FirstPixelPointer { get; set; }
 
         public CharacterBitmapGenerator(ITiledImage<Character> input) : base(input)
         {
             charImages = new Bitmap[input.Columns, input.Rows];
+            sb = new StringBuilder();
+            tileCache = new Dictionary<int, Bitmap>();
+            blackBrush = Brushes.Black;
+            whiteBrush = Brushes.White;
+            tileSize = input.TileSize;
         }
 
         public override async Task<Bitmap> GenerateImageAsync()
@@ -43,31 +54,29 @@ namespace Twipe.Core.Internals
 
                 Bitmap image = null;
 
-                //CreateImages(0);
-
                 for (int row = 0; row < input.Rows; row++)
                 {
-                    //if (row + 1 < input.Rows)
-                    //    CreateImagesAsync(row + 1);
-
                     for (int column = 0; column < input.Columns; column++)
                     {
-                        //image = charImages[column, row];
-                        using (image = GetImageFor(input.GetTile(column, row)))
-                        {
-                            int startingX = column * input.TileSize;
-                            int startingY = row * input.TileSize;
+                        image = GetImageFor(input.GetTile(column, row));
 
-                            DrawImage(image, startingX, startingY);
+                        int startingX = column * tileSize;
+                        int startingY = row * tileSize;
 
-                            //image.Dispose();
-                            //charImages[column] = null;
-                        }
+                        DrawImage(image, startingX, startingY);
                     }
                 }
 
                 result.UnlockBits(resultData);
+
+                CleanupCache();
             }
+        }
+
+        private unsafe void CleanupCache()
+        {
+            foreach (Bitmap b in tileCache.Values)
+                b.Dispose();
         }
 
         private async void CreateImagesAsync(int row)
@@ -91,24 +100,34 @@ namespace Twipe.Core.Internals
 
         private Bitmap GetImageFor(Character c)
         {
-            Bitmap image = new Bitmap(input.TileSize, input.TileSize);
+            int key = c.GetHashCode();
+            if (tileCache.ContainsKey(key))
+                return tileCache[key];
+
+            Bitmap image = new Bitmap(tileSize, tileSize);
 
             using (Graphics g = Graphics.FromImage(image))
             {
-                g.FillRectangle(Brushes.White, new Rectangle(0, 0, input.TileSize, input.TileSize));
-                g.DrawString(c.Value.ToString(), c.Font, Brushes.Black, new Point(1, 1));
-                g.Save();
+                g.FillRectangle(whiteBrush, new Rectangle(0, 0, tileSize, tileSize));
+                g.DrawString(c.Value.ToString(), c.Font, blackBrush, new Point(0, 0));
             }
 
             return image;
+        }
+
+        private string GenerateKey(Character c)
+        {
+            sb.Clear();
+            sb.Append((int)c.Value);
+            sb.Append("-");
+            sb.Append(c.Font.Name);
+            return sb.ToString();
         }
 
         private void DrawImage(Bitmap image, int startingX, int startingY)
         {
             unsafe
             {
-                int tileSize = input.TileSize;
-                //Color pixel;
                 int positionInBytes;
 
                 BitmapData tileData = image.LockBits(new Rectangle(0, 0, image.Width, image.Height),
@@ -122,8 +141,6 @@ namespace Twipe.Core.Internals
 
                     for (int x = 0; x < tileSize; x++)
                     {
-                        //pixel = image.GetPixel(x, y);
-
                         positionInBytes = (x * bytesPerPixel);
 
                         currentLine[positionInBytes] = *ptrPixelData;
@@ -132,11 +149,6 @@ namespace Twipe.Core.Internals
                         currentLine[positionInBytes + 3] = *(ptrPixelData + 3);
 
                         ptrPixelData += 4;
-
-                        //currentLine[positionInBytes] = (byte)pixel.B;
-                        //currentLine[positionInBytes + 1] = (byte)pixel.G;
-                        //currentLine[positionInBytes + 2] = (byte)pixel.R;
-                        //currentLine[positionInBytes + 3] = (byte)pixel.A;
                     }
                 }
 

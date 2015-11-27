@@ -7,6 +7,7 @@ namespace Twipe.Core.Internals
     {
         private IList<SubstitutionItem<T>>[] grayShades;
         private ShadeSubstitutionAcceptance acceptanceRange;
+        private Random rand;
         private const int MaxShadeValue = 255;
         private readonly double QuarterOfAShadeDifference = 0.25 / MaxShadeValue;
 
@@ -25,6 +26,8 @@ namespace Twipe.Core.Internals
 
             acceptanceRange = ShadeSubstitutionAcceptance.HalfAShade;
             //acceptanceRange = ShadeSubstitutionAcceptance.QuarterOfAShade;
+
+            rand = new Random();
         }
 
         public ShadeSubstitutionAcceptance AcceptanceRange
@@ -94,7 +97,6 @@ namespace Twipe.Core.Internals
 
         private T PickRandomly(IList<SubstitutionItem<T>> list)
         {
-            Random rand = new Random();
             int index = rand.Next(0, list.Count - 1);
 
             return list[index].Value;

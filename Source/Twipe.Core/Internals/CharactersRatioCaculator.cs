@@ -11,6 +11,7 @@ namespace Twipe.Core.Internals
         private IPixelIdentifier algorithm;
         private int tileSize;
         private List<SubstitutionItem<Character>> ratios;
+        private readonly string WidestCharacter = "W";
 
         public CharactersRatioCaculator(IPixelIdentifier pixelIdentifier)
         {
@@ -40,10 +41,11 @@ namespace Twipe.Core.Internals
         private SubstitutionItem<Character>[] ComputeRatios()
         {
             List<SubstitutionItem<Character>> ratiosList;
+            int fontsCount = fontFamilies.Length;
 
-            foreach (FontFamily fontFamily in fontFamilies)
+            for (int i = 0; i < fontsCount; i++)
             {
-                ratiosList = GetCharactersRatios(fontFamily);
+                ratiosList = GetCharactersRatios(fontFamilies[i]);
 
                 AppendRatios(ratiosList);
             }
@@ -106,13 +108,37 @@ namespace Twipe.Core.Internals
             using (Bitmap temp = new Bitmap(tileSize, tileSize))
             {
                 Graphics g = Graphics.FromImage(temp);
+                //tr = new NativeTextRenderer(g);
+
                 for (; fontSize > 0; fontSize--)
                 {
-                    box = g.MeasureString("D", CreateFont(fontFamily, fontSize));
+                    using (Font font = CreateFont(fontFamily, fontSize))
+                    {
+                        box = g.MeasureString(WidestCharacter, font);
 
-                    if (box.Height < tileSize && box.Width < tileSize)
-                        break;
+                        if (box.Height < tileSize && box.Width < tileSize)
+                            break;
+                    }
                 }
+
+                for (float f = 0.1F; f < 1; f += 0.1F)
+                {
+                    using (Font font = CreateFont(fontFamily, fontSize + f))
+                    {
+                        box = g.MeasureString(WidestCharacter, font);
+
+                        if (box.Height >= tileSize || box.Width >= tileSize)
+                        {
+                            fontSize += (f - 0.1F);
+                            break;
+                        }
+                    }
+                }
+
+                if (fontSize == 0)
+                    fontSize = 0.1F;
+
+                g.Dispose();
             }
 
             return fontSize;
@@ -145,8 +171,7 @@ namespace Twipe.Core.Internals
             using (Graphics g = Graphics.FromImage(image))
             {
                 g.FillRectangle(Brushes.White, new Rectangle(0, 0, tileSize, tileSize));
-                g.DrawString(c.ToString(), font, Brushes.Black, new Point(1, 1));
-                g.Save();
+                g.DrawString(c.ToString(), font, Brushes.Black, new Point(0, 0));
             }
 
             return image;
