@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Drawing.Text;
 using System.Threading.Tasks;
 
@@ -14,10 +15,15 @@ namespace Twipe.Core.Internals
         private FontFamily defaultFontFamily;
         private FontSet fontSet;
 
+        public event EventHandler<ProgressEventArgs> ProgressChanged;
+
+        public event EventHandler Completed;
+
         public CharacterSubstitutionBuilder(ICharacterRatioCalculator calculator)
         {
             table = new SubstitutionTable<Character>();
             this.calculator = calculator;
+            this.calculator.ProgressChanged += Calculator_ProgressChanged;
         }
 
         public int TileSize
@@ -88,6 +94,17 @@ namespace Twipe.Core.Internals
                 SystemFonts.SmallCaptionFont.FontFamily,
                 SystemFonts.StatusFont.FontFamily
             };
+        }
+
+        private void OnProgressChanged(float progress, string message)
+        {
+            if (ProgressChanged != null)
+                ProgressChanged(this, new ProgressEventArgs(progress, message));
+        }
+
+        private void Calculator_ProgressChanged(object sender, ProgressEventArgs e)
+        {
+            OnProgressChanged(e.Progress, e.Message);
         }
     }
 }

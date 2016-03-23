@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -14,6 +15,13 @@ namespace Twipe.UI.ViewModels
         private bool hasConverted;
         private bool canBrowse;
         private bool canSave;
+        private float progress;
+        private float pixelationProgress;
+        private float imageGenerationProgress;
+        private bool isProgressShown;
+        private string statusMessage;
+        private readonly float PixelationProgressFactor = 0.5F;
+        private readonly float ImageGenerationProgressFactor = 0.5F;
         private BitmapImage originalImage;
         private BitmapImage convertedImage;
         private IOpenFileService openFileSrv;
@@ -33,6 +41,8 @@ namespace Twipe.UI.ViewModels
             canBrowse = true;
             canSave = false;
             tempFileName = System.IO.Path.GetTempPath() + "temp_image.jpg";
+            statusMessage = "Ready";
+            isProgressShown = false;
         }
 
         public ImageSource OriginalImage
@@ -62,6 +72,45 @@ namespace Twipe.UI.ViewModels
             }
         }
 
+        public float Progress
+        {
+            get
+            {
+                return progress;
+            }
+            private set
+            {
+                this.progress = value;
+                OnPropertyChanged("Progress");
+            }
+        }
+
+        public string StatusMessage
+        {
+            get
+            {
+                return statusMessage;
+            }
+            set
+            {
+                statusMessage = value;
+                OnPropertyChanged("StatusMessage");
+            }
+        }
+
+        public bool IsProgressShown
+        {
+            get
+            {
+                return isProgressShown;
+            }
+            set
+            {
+                isProgressShown = value;
+                OnPropertyChanged("IsProgressShown");
+            }
+        }
+
         public RelayCommand BrowseCommand { get; private set; }
 
         public RelayCommand ConvertCommand { get; private set; }
@@ -81,6 +130,7 @@ namespace Twipe.UI.ViewModels
             {
                 OriginalImage = new BitmapImage(new Uri(file));
                 ConvertCommand.RaiseCanExecuteChanged();
+                StatusMessage = "Ready";
             }
         }
 
@@ -92,6 +142,7 @@ namespace Twipe.UI.ViewModels
         private async void OnConvert()
         {
             DisableConversion();
+            IsProgressShown = true;
 
             ConvertedImage = null;
             FreezeInteractions();
@@ -101,9 +152,12 @@ namespace Twipe.UI.ViewModels
             manager.TileSize = this.CurrentSettingViewModel.TileSize;
             manager.Pixelator = new Pixelator<Character>();
             manager.Converter = new AverageConverter(new Bitmap(originalImage.UriSource.LocalPath));
+            manager.ProgressChanged += ProgressChangedHandler;
             await manager.ProcessAsync();
 
             CharacterBitmapGenerator generator = new CharacterBitmapGenerator(manager.Result);
+            generator.ProgressChanged += ProgressChangedHandler;
+            generator.Completed += CompletedHandler;
             Bitmap image = await generator.GenerateImageAsync();
             image.Save(tempFileName);
             image.Dispose();
@@ -161,6 +215,19 @@ namespace Twipe.UI.ViewModels
 
             if (!string.IsNullOrEmpty(destFileName))
                 saveFileSrv.SaveFile(manager.Result);
+        }
+
+        private void ProgressChangedHandler(object sender, ProgressEventArgs e)
+        {
+            Progress = e.Progress;
+            StatusMessage = e.Message;
+        }
+
+        private void CompletedHandler(object sender, EventArgs e)
+        {
+            Progress = 0;
+            IsProgressShown = false;
+            StatusMessage = "Ready";
         }
     }
 }

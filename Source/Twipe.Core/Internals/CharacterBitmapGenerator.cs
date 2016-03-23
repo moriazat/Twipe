@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Text;
@@ -19,12 +20,16 @@ namespace Twipe.Core.Internals
         private Brush blackBrush;
         private Brush whiteBrush;
         private int tileSize;
+        private int numberOfTotalTiles;
+        private int numberOfTilesProcessed;
 
         private unsafe byte* FirstPixelPointer { get; set; }
 
         public CharacterBitmapGenerator(ITiledImage<Character> input) : base(input)
         {
             charImages = new Bitmap[input.Columns, input.Rows];
+            numberOfTotalTiles = input.Columns * input.Rows;
+            numberOfTilesProcessed = 0;
             sb = new StringBuilder();
             tileCache = new Dictionary<int, Bitmap>();
             blackBrush = Brushes.Black;
@@ -37,6 +42,8 @@ namespace Twipe.Core.Internals
             worker = Task.Factory.StartNew(GenerateImage);
 
             await worker;
+
+            OnCompleted();
 
             return result;
         }
@@ -51,6 +58,7 @@ namespace Twipe.Core.Internals
                 heightInPixels = resultData.Height;
                 widthInBytes = resultData.Width * bytesPerPixel;
                 FirstPixelPointer = (byte*)resultData.Scan0;
+                float progress;
 
                 Bitmap image = null;
 
@@ -64,7 +72,12 @@ namespace Twipe.Core.Internals
                         int startingY = row * tileSize;
 
                         DrawImage(image, startingX, startingY);
+
+                        numberOfTilesProcessed++;
                     }
+
+                    progress = (numberOfTilesProcessed / (float)numberOfTotalTiles) * 100;
+                    OnProgressChanged(progress);
                 }
 
                 result.UnlockBits(resultData);
@@ -108,7 +121,7 @@ namespace Twipe.Core.Internals
 
             using (Graphics g = Graphics.FromImage(image))
             {
-                g.FillRectangle(whiteBrush, new Rectangle(0, 0, tileSize, tileSize));
+                //g.FillRectangle(whiteBrush, new Rectangle(0, 0, tileSize, tileSize));
                 g.DrawString(c.Value.ToString(), c.Font, blackBrush, new Point(0, 0));
             }
 

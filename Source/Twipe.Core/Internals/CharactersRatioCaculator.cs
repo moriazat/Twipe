@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Threading.Tasks;
@@ -12,6 +13,10 @@ namespace Twipe.Core.Internals
         private int tileSize;
         private List<SubstitutionItem<Character>> ratios;
         private readonly string WidestCharacter = "W";
+
+        public event EventHandler<ProgressEventArgs> ProgressChanged;
+
+        public event EventHandler Completed;
 
         public CharactersRatioCaculator(IPixelIdentifier pixelIdentifier)
         {
@@ -46,11 +51,15 @@ namespace Twipe.Core.Internals
             for (int i = 0; i < fontsCount; i++)
             {
                 ratiosList = GetCharactersRatios(fontFamilies[i]);
-
+                OnProgressChanged(i);
                 AppendRatios(ratiosList);
             }
 
-            return ratios.ToArray();
+            var ratiosArray = ratios.ToArray();
+
+            OnCompleted();
+
+            return ratiosArray;
         }
 
         private void AppendRatios(List<SubstitutionItem<Character>> ratiosList)
@@ -175,6 +184,24 @@ namespace Twipe.Core.Internals
             }
 
             return image;
+        }
+
+        private void OnProgressChanged(int fontIndex)
+        {
+            if (ProgressChanged != null)
+            {
+                float progress = ((fontIndex + 1) / (float)fontFamilies.Length);
+                progress *= 100;
+                string message = string.Format("\"{0}\" font is added to the collection.", fontFamilies[fontIndex].Name);
+
+                ProgressChanged(this, new ProgressEventArgs(progress, message));
+            }
+        }
+
+        private void OnCompleted()
+        {
+            if (Completed != null)
+                Completed(this, null);
         }
     }
 }

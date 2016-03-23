@@ -1,4 +1,6 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
+using System.Threading.Tasks;
 
 namespace Twipe.Core.Internals
 {
@@ -6,11 +8,15 @@ namespace Twipe.Core.Internals
     /// This is the base class for algorithms that pixelate a given image.
     /// </summary>
     /// <typeparam name="T">Type of the object used for susbstitution of each pixel in the given image.</typeparam>
-    public abstract class PixelatorBase<T>
+    public abstract class PixelatorBase<T> : IProgressable
     {
         protected Bitmap input;
         protected ITiledImage<T> output;
         protected ISubstitutionTable<T> table;
+
+        public event EventHandler<ProgressEventArgs> ProgressChanged;
+
+        public event EventHandler Completed;
 
         public virtual ISubstitutionTable<T> SubstitutionTable
         {
@@ -34,5 +40,13 @@ namespace Twipe.Core.Internals
         }
 
         public abstract ITiledImage<T> Pixelate();
+
+        public abstract Task<ITiledImage<T>> PixelateAsync();
+
+        protected virtual void OnProgressChanged(float progress)
+        {
+            if (ProgressChanged != null)
+                ProgressChanged(this, new ProgressEventArgs(progress));
+        }
     }
 }

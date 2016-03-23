@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:Twipe.UI"
         xmlns:vm="clr-namespace:Twipe.UI.ViewModels"
         xmlns:v="clr-namespace:Twipe.UI.Views"
+        xmlns:diag="clr-namespace:System.Diagnostics;assembly=WindowsBase"
         mc:Ignorable="d"
         Title="Twipe" Height="500" Width="1000"
         WindowStartupLocation="CenterScreen">
@@ -13,78 +14,122 @@
     <Window.DataContext>
         <vm:MainWindowViewModel />
     </Window.DataContext>
-    
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="booleanToVisibilityConverter" />
+    </Window.Resources>
+
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="25" />
+        </Grid.RowDefinitions>
 
-        <Grid Grid.Column="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-
-            <v:CharacterConvertionSettingsView Grid.Row="0"
-                                               DataContext="{Binding CurrentSettingViewModel}"/>
-            
-            <Button Grid.Row="1" Margin="10, 20, 10, 20" Height="23"
-                    Content="Convert"
-                    Command="{Binding ConvertCommand}"/>
-        </Grid>
-        
-        <GridSplitter Width="4" Grid.Column="1" IsEnabled="False"/>
-
-        <Grid Grid.Column="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <Grid>
+            <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <Label Content="Original Image:" Margin="20, 30, 20, 0" 
-                       Grid.Row="0"/>
-                <Image Grid.Row="1" Grid.Column="0" Margin="20" 
-                       Source="{Binding OriginalImage}" 
-                       RenderOptions.BitmapScalingMode="HighQuality"/>
-                <Button Content="Browse" Margin="20" Height="23" Width="80"
-                        Grid.Row="2"
-                        Command="{Binding BrowseCommand}"/>
+                <v:CharacterConvertionSettingsView Grid.Row="0"
+                                               DataContext="{Binding CurrentSettingViewModel}" />
+
+                <Button Grid.Row="1" Margin="10, 20, 10, 20" Height="23"
+
+                    Command="{Binding ConvertCommand}">
+                    <TextBlock Text="Convert" />
+                </Button>
             </Grid>
 
-            <GridSplitter Grid.Row="0" Grid.Column="1" Width="1"
-                          IsEnabled="False"/>
+            <GridSplitter Width="4" Grid.Column="1" IsEnabled="False" />
 
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-                <Label Content="Converted Image:" Margin="20, 30, 20, 0" 
-                       Grid.Row="0"/>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-                <Image Grid.Row="1" Grid.Column="2" Margin="20"
+                    <Label Content="Original Image:" Margin="20, 30, 20, 0"
+                       Grid.Row="0" />
+                    <Image Grid.Row="1" Grid.Column="0" Margin="20"
+                       Source="{Binding OriginalImage}"
+                       RenderOptions.BitmapScalingMode="HighQuality" />
+                    <Button Content="Browse" Margin="20" Height="23" Width="80"
+                        Grid.Row="2"
+                        Command="{Binding BrowseCommand}" />
+                </Grid>
+
+                <GridSplitter Grid.Row="0" Grid.Column="1" Width="1"
+                          IsEnabled="False" />
+
+                <Grid Grid.Column="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Label Content="Converted Image:" Margin="20, 30, 20, 0"
+                       Grid.Row="0" />
+
+                    <Image Grid.Row="1" Grid.Column="2" Margin="20"
                        Source="{Binding ConvertedImage}"
-                       RenderOptions.BitmapScalingMode="Fant"/>
+                       RenderOptions.BitmapScalingMode="Fant" />
 
-                <Button Content="Save As" Margin="20" Height="23" Width="80" Grid.Row="2"
-                        Command="{Binding SaveCommand}"/>
+                    <Button Content="Save As" Margin="20" Height="23" Width="80" Grid.Row="2"
+                        Command="{Binding SaveCommand}" />
+                </Grid>
             </Grid>
         </Grid>
+
+        <StatusBar Grid.Row="1">
+
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+
+            <StatusBarItem>
+                <TextBlock Margin="10, 0" Text="{Binding StatusMessage}" />
+            </StatusBarItem>
+
+            <StatusBarItem Grid.Column="1">
+                <Grid Margin="10, 0">
+                    <ProgressBar Value="{Binding Progress}" Height="18" Width="200"
+                                 Visibility="{Binding IsProgressShown, Converter={StaticResource booleanToVisibilityConverter}}" />
+
+                    <TextBlock Text="{Binding Progress, StringFormat={}{0:0.00}%}"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="11"
+                               Visibility="{Binding IsProgressShown, Converter={StaticResource booleanToVisibilityConverter}}" />
+                </Grid>
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </Window>

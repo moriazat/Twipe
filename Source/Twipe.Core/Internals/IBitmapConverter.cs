@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Twipe.Core.Internals
 {
-    public interface IBitmapConverter
+    public interface IBitmapConverter : IProgressable
     {
         Bitmap Result { get; }
 

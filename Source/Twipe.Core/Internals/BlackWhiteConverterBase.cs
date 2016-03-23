@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Drawing.Imaging;
 using System.Threading.Tasks;
 
@@ -8,10 +9,16 @@ namespace Twipe.Core.Internals
     {
         protected Bitmap result;
         protected Bitmap input;
+        protected int totalPixels;
+
+        public event EventHandler<ProgressEventArgs> ProgressChanged;
+
+        public event EventHandler Completed;
 
         public BlackWhiteConverterBase(Bitmap inputImage)
         {
-            input = inputImage; ;
+            input = inputImage;
+            totalPixels = input.Width * input.Height;
         }
 
         public virtual Bitmap Result
@@ -42,10 +49,9 @@ namespace Twipe.Core.Internals
                 byte* resultPtr = (byte*)resultData.Scan0;
 
                 int bytesPerPixel = Bitmap.GetPixelFormatSize(input.PixelFormat) / 8;
-                int totalPixels = input.Width * input.Height;
                 int average;
 
-                average = ConvertPixels(ref inputPtr, ref resultPtr, bytesPerPixel, totalPixels);
+                average = ConvertPixels(ref inputPtr, ref resultPtr, bytesPerPixel);
 
                 input.UnlockBits(inputData);
                 result.UnlockBits(resultData);
@@ -54,7 +60,7 @@ namespace Twipe.Core.Internals
             return result;
         }
 
-        private unsafe int ConvertPixels(ref byte* inputPtr, ref byte* resultPtr, int bytesPerPixel, int totalPixels)
+        private unsafe int ConvertPixels(ref byte* inputPtr, ref byte* resultPtr, int bytesPerPixel)
         {
             int average = 0;
             for (int i = 0; i < totalPixels; i++)
@@ -66,6 +72,8 @@ namespace Twipe.Core.Internals
 
                 inputPtr += bytesPerPixel;
                 resultPtr += bytesPerPixel;
+
+                OnProgressChanged(i + 1);
             }
 
             return average;
@@ -74,5 +82,14 @@ namespace Twipe.Core.Internals
         protected abstract int GetAverageValue(Color pixel);
 
         protected abstract int GetAverageValue(int red, int green, int blue);
+
+        protected void OnProgressChanged(int pixelCount)
+        {
+            float progress = pixelCount / (float)totalPixels;
+            progress *= 100;
+
+            if (ProgressChanged != null)
+                ProgressChanged(this, new ProgressEventArgs(progress));
+        }
     }
 }
