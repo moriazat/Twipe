@@ -121,7 +121,7 @@ namespace Twipe.Core.Internals
 
             using (Graphics g = Graphics.FromImage(image))
             {
-                //g.FillRectangle(whiteBrush, new Rectangle(0, 0, tileSize, tileSize));
+                g.FillRectangle(whiteBrush, new Rectangle(0, 0, tileSize, tileSize));
                 g.DrawString(c.Value.ToString(), c.Font, blackBrush, new Point(0, 0));
             }
 

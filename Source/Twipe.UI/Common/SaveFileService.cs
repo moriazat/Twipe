@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using System;
 using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
@@ -6,8 +7,12 @@ using Twipe.Core.Internals;
 
 namespace Twipe.UI.Common
 {
-    public class SaveFileService : FileServiceBase, ISaveFileService
+    public class SaveFileService : FileServiceBase, ISaveFileService, IProgressable
     {
+        public event EventHandler Completed;
+
+        public event EventHandler<ProgressEventArgs> ProgressChanged;
+
         public async void SaveFile<T>(ITiledImage<T> pixelatedImage)
         {
             await SaveFileAsync(pixelatedImage);
@@ -29,6 +34,8 @@ namespace Twipe.UI.Common
         {
             CharacterBitmapGenerator generator =
                     new CharacterBitmapGenerator((ITiledImage<Character>)pixelatedImage);
+            generator.ProgressChanged += Generator_ProgressChanged;
+            generator.Completed += Generator_Completed;
             Bitmap result = await generator.GenerateImageAsync();
             result.Save(this.fileName);
             result.Dispose();
@@ -46,6 +53,28 @@ namespace Twipe.UI.Common
 
                 sw.WriteLine();
             }
+        }
+
+        private void OnCompleted()
+        {
+            if (Completed != null)
+                Completed(this, new EventArgs());
+        }
+
+        private void OnProgressChanged(float progress)
+        {
+            if (ProgressChanged != null)
+                ProgressChanged(this, new ProgressEventArgs(progress, "Saving the result..."));
+        }
+
+        private void Generator_Completed(object sender, EventArgs e)
+        {
+            OnCompleted();
+        }
+
+        private void Generator_ProgressChanged(object sender, ProgressEventArgs e)
+        {
+            OnProgressChanged(e.Progress);
         }
     }
 }

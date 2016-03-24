@@ -16,12 +16,8 @@ namespace Twipe.UI.ViewModels
         private bool canBrowse;
         private bool canSave;
         private float progress;
-        private float pixelationProgress;
-        private float imageGenerationProgress;
         private bool isProgressShown;
         private string statusMessage;
-        private readonly float PixelationProgressFactor = 0.5F;
-        private readonly float ImageGenerationProgressFactor = 0.5F;
         private BitmapImage originalImage;
         private BitmapImage convertedImage;
         private IOpenFileService openFileSrv;
@@ -214,7 +210,12 @@ namespace Twipe.UI.ViewModels
             string destFileName = saveFileSrv.SelectFile();
 
             if (!string.IsNullOrEmpty(destFileName))
+            {
+                IsProgressShown = true;
+                saveFileSrv.ProgressChanged += ProgressChangedHandler;
+                saveFileSrv.Completed += CompletedHandler;
                 saveFileSrv.SaveFile(manager.Result);
+            }
         }
 
         private void ProgressChangedHandler(object sender, ProgressEventArgs e)
