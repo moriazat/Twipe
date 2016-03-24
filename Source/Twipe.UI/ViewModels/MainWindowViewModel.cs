@@ -30,8 +30,8 @@ namespace Twipe.UI.ViewModels
             BrowseCommand = new RelayCommand(OnBrowse, CanBrowse);
             ConvertCommand = new RelayCommand(OnConvert, CanConvert);
             SaveCommand = new RelayCommand(OnSave, CanSave);
-            openFileSrv = new OpenFileService();
-            saveFileSrv = new SaveFileService();
+            openFileSrv = new OpenFileService(new Microsoft.Win32.OpenFileDialog());
+            saveFileSrv = new SaveFileService(new Microsoft.Win32.SaveFileDialog());
             cSettingVM = new CharacterConvesionSettingsViewModel();
             hasConverted = false;
             canBrowse = true;
@@ -214,7 +214,7 @@ namespace Twipe.UI.ViewModels
                 IsProgressShown = true;
                 saveFileSrv.ProgressChanged += ProgressChangedHandler;
                 saveFileSrv.Completed += CompletedHandler;
-                saveFileSrv.SaveFile(manager.Result);
+                saveFileSrv.SaveFileAs(tempFileName);
             }
         }
 

@@ -5,6 +5,6 @@ namespace Twipe.UI.Common
 {
     public interface ISaveFileService : IFileService, IProgressable
     {
-        void SaveFile<T>(ITiledImage<T> pixelatedImage);
+        void SaveFileAs(string sourceFile);
     }
 }

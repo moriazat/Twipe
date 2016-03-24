@@ -13,16 +13,19 @@ namespace Twipe.UI.Common
 
         public event EventHandler<ProgressEventArgs> ProgressChanged;
 
-        public async void SaveFile<T>(ITiledImage<T> pixelatedImage)
+        public SaveFileService(FileDialog dialog) : base(dialog)
         {
-            await SaveFileAsync(pixelatedImage);
+            dlg.Filter = "JPEG File (*.jpg)|*.jpg|Bitmap File (*.bmp)|*.bmp|PNG File (*.png)|*.png";
+        }
+
+        public async void SaveFileAs(string sourceFile)
+        {
+            await Task.Run(() => SaveFileAsAsync(sourceFile));
         }
 
         public override string SelectFile()
         {
-            SaveFileDialog dlg = new SaveFileDialog();
-            dlg.Filter = "JPEG File (*.jpg)|*.jpg|Bitmap File (*.bmp)|*.bmp|PNG File (*.png)|*.png";
-            dlg.FileName = fileName;
+            dlg.FileName = string.Empty;
 
             if ((bool)dlg.ShowDialog())
                 fileName = dlg.FileName;
@@ -30,15 +33,25 @@ namespace Twipe.UI.Common
             return fileName;
         }
 
-        private async Task SaveFileAsync<T>(ITiledImage<T> pixelatedImage)
+        private void SaveFileAsAsync(string source)
         {
-            CharacterBitmapGenerator generator =
-                    new CharacterBitmapGenerator((ITiledImage<Character>)pixelatedImage);
-            generator.ProgressChanged += Generator_ProgressChanged;
-            generator.Completed += Generator_Completed;
-            Bitmap result = await generator.GenerateImageAsync();
-            result.Save(this.fileName);
-            result.Dispose();
+            // copy source file to a temp file to avoid conflict
+            string tempFile = Path.GetTempPath() + "saveTempFile";
+            File.Copy(source, tempFile);
+            OnProgressChanged(20);
+
+            Bitmap tempBitmap = new Bitmap(tempFile);
+            OnProgressChanged(40);
+
+            tempBitmap.Save(fileName);
+            OnProgressChanged(60);
+
+            tempBitmap.Dispose();
+            OnProgressChanged(80);
+
+            File.Delete(tempFile);
+            OnProgressChanged(100);
+            OnCompleted();
         }
 
         private void WriteToFile<T>(StreamWriter sw, ITiledImage<T> pixelatedImage)
