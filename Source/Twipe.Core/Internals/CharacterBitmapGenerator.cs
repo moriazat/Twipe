@@ -1,4 +1,5 @@
 ﻿
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -14,20 +15,20 @@ namespace Twipe.Core.Internals
         private int bytesPerPixel;
         private int heightInPixels;
         private int widthInBytes;
-        private Bitmap[,] charImages;
         private StringBuilder sb;
-        private Dictionary<int, Bitmap> tileCache;
+        private IDictionary<int, Bitmap> tileCache;
         private Brush blackBrush;
         private Brush whiteBrush;
         private int tileSize;
         private int numberOfTotalTiles;
         private int numberOfTilesProcessed;
+        private Point startingPointZero;
+        private Rectangle tileRectangle;
 
         private unsafe byte* FirstPixelPointer { get; set; }
 
         public CharacterBitmapGenerator(ITiledImage<Character> input) : base(input)
         {
-            charImages = new Bitmap[input.Columns, input.Rows];
             numberOfTotalTiles = input.Columns * input.Rows;
             numberOfTilesProcessed = 0;
             sb = new StringBuilder();
@@ -35,6 +36,8 @@ namespace Twipe.Core.Internals
             blackBrush = Brushes.Black;
             whiteBrush = Brushes.White;
             tileSize = input.TileSize;
+            startingPointZero = new Point(0, 0);
+            tileRectangle = new Rectangle(0, 0, tileSize, tileSize);
         }
 
         public override async Task<Bitmap> GenerateImageAsync()
@@ -59,12 +62,14 @@ namespace Twipe.Core.Internals
                 widthInBytes = resultData.Width * bytesPerPixel;
                 FirstPixelPointer = (byte*)resultData.Scan0;
                 float progress;
+                int rows = input.Rows;
+                int columns = input.Columns;
 
                 Bitmap image = null;
 
-                for (int row = 0; row < input.Rows; row++)
+                for (int row = 0; row < rows; row++)
                 {
-                    for (int column = 0; column < input.Columns; column++)
+                    for (int column = 0; column < columns; column++)
                     {
                         image = GetImageFor(input.GetTile(column, row));
 
@@ -92,25 +97,6 @@ namespace Twipe.Core.Internals
                 b.Dispose();
         }
 
-        private async void CreateImagesAsync(int row)
-        {
-            for (int column = 0; column < input.Columns; column++)
-                charImages[column, row] = await GetImageForAsync(input.GetTile(column, row));
-        }
-
-        private void CreateImages(int row)
-        {
-            for (int column = 0; column < input.Columns; column++)
-                charImages[column, row] = GetImageFor(input.GetTile(column, row));
-        }
-
-        private async Task<Bitmap> GetImageForAsync(Character c)
-        {
-            Task<Bitmap> task = Task.Run(() => GetImageFor(c));
-
-            return await task;
-        }
-
         private Bitmap GetImageFor(Character c)
         {
             int key = c.GetHashCode();
@@ -121,8 +107,8 @@ namespace Twipe.Core.Internals
 
             using (Graphics g = Graphics.FromImage(image))
             {
-                g.FillRectangle(whiteBrush, new Rectangle(0, 0, tileSize, tileSize));
-                g.DrawString(c.Value.ToString(), c.Font, blackBrush, new Point(0, 0));
+                g.FillRectangle(whiteBrush, tileRectangle);
+                g.DrawString(c.Value.ToString(), c.Font, blackBrush, startingPointZero);
             }
 
             return image;
@@ -143,8 +129,8 @@ namespace Twipe.Core.Internals
             {
                 int positionInBytes;
 
-                BitmapData tileData = image.LockBits(new Rectangle(0, 0, image.Width, image.Height),
-                                                     ImageLockMode.ReadOnly, image.PixelFormat);
+                BitmapData tileData =
+                    image.LockBits(tileRectangle, ImageLockMode.ReadOnly, image.PixelFormat);
                 byte* ptrPixelData = (byte*)tileData.Scan0;
 
                 for (int y = 0; y < tileSize; y++)
