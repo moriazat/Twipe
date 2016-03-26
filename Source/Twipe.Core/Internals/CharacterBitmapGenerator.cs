@@ -17,7 +17,7 @@ namespace Twipe.Core.Internals
         private int tileSize;
         private int numberOfTotalTiles;
         private int numberOfTilesProcessed;
-        private bool useColoredTiles;
+        private bool useTransparentTiles;
         private Task worker;
         private BitmapData resultData;
         private StringBuilder sb;
@@ -41,25 +41,25 @@ namespace Twipe.Core.Internals
             tileSize = input.TileSize;
             startingPointZero = new Point(0, 0);
             tileRectangle = new Rectangle(0, 0, tileSize, tileSize);
-            useColoredTiles = false;
-            CreateTile = this.CreatePlainTile;
+            useTransparentTiles = false;
+            CreateTile = this.CreateTransparentTile;
         }
 
-        public bool UseColoredTiles
+        public bool UseTransparentTiles
         {
             get
             {
-                return useColoredTiles;
+                return useTransparentTiles;
             }
 
             set
             {
-                useColoredTiles = value;
+                useTransparentTiles = value;
 
                 if (value)
-                    CreateTile = CreateColoredTile;
+                    CreateTile = CreateTransparentTile;
                 else
-                    CreateTile = CreatePlainTile;
+                    CreateTile = CreateColoredTile;
             }
         }
 
@@ -126,7 +126,7 @@ namespace Twipe.Core.Internals
             g.DrawString(c.Value.ToString(), c.Font, foregraoundBrush, startingPointZero);
         }
 
-        private void CreatePlainTile(Graphics g, Character c)
+        private void CreateTransparentTile(Graphics g, Character c)
         {
             g.DrawString(c.Value.ToString(), c.Font, foregraoundBrush, startingPointZero);
         }

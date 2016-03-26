@@ -154,7 +154,7 @@ namespace Twipe.UI.ViewModels
             CharacterBitmapGenerator generator = new CharacterBitmapGenerator(manager.Result);
             generator.ProgressChanged += ProgressChangedHandler;
             generator.Completed += CompletedHandler;
-            generator.UseColoredTiles = CurrentSettingViewModel.UseColoredTiles;
+            generator.UseTransparentTiles = CurrentSettingViewModel.UseTransparentTiles;
             Bitmap image = await generator.GenerateImageAsync();
             image.Save(tempFileName);
             image.Dispose();

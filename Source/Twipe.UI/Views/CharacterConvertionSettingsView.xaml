@@ -24,9 +24,9 @@
                       SelectedItem="{Binding SelectedFont}"
                       IsEnabled="{Binding CanSelectFont}" />
 
-            <CheckBox IsChecked="{Binding UseColoredTiles}"
+            <CheckBox IsChecked="{Binding UseTransparentTiles}"
                       Margin="0, 10">
-                Use white tiles
+                Use transparent tiles
             </CheckBox>
 
             <TextBlock Text="Tile Size:" VerticalAlignment="Center"

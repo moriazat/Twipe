@@ -12,7 +12,7 @@ namespace Twipe.UI.ViewModels
         private FontFamily selectedFont;
         private bool canSelectFont;
         private int tileSize;
-        private bool useColoredTiles;
+        private bool useTransparentTiles;
 
         public CharacterConvesionSettingsViewModel()
         {
@@ -57,15 +57,15 @@ namespace Twipe.UI.ViewModels
             }
         }
 
-        public bool UseColoredTiles
+        public bool UseTransparentTiles
         {
             get
             {
-                return useColoredTiles;
+                return useTransparentTiles;
             }
             set
             {
-                useColoredTiles = value;
+                useTransparentTiles = value;
                 OnPropertyChanged("UseColoredTiles");
             }
         }
