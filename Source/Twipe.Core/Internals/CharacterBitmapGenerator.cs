@@ -141,8 +141,7 @@ namespace Twipe.Core.Internals
 
             using (Graphics g = Graphics.FromImage(image))
             {
-                //CreateTile(g, c);
-                g.DrawString(c.Value.ToString(), c.Font, foregraoundBrush, startingPointZero);
+                CreateTile(g, c);
             }
 
             return image;
