@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Twipe.Core.Internals;
 using System.Drawing;
 using System.Drawing.Text;
+using Twipe.Core.Internals;
 
 namespace Twipe.UI.ViewModels
 {
@@ -12,6 +12,7 @@ namespace Twipe.UI.ViewModels
         private FontFamily selectedFont;
         private bool canSelectFont;
         private int tileSize;
+        private bool useColoredTiles;
 
         public CharacterConvesionSettingsViewModel()
         {
@@ -53,6 +54,19 @@ namespace Twipe.UI.ViewModels
             {
                 tileSize = value;
                 OnPropertyChanged("CellSize");
+            }
+        }
+
+        public bool UseColoredTiles
+        {
+            get
+            {
+                return useColoredTiles;
+            }
+            set
+            {
+                useColoredTiles = value;
+                OnPropertyChanged("UseColoredTiles");
             }
         }
 

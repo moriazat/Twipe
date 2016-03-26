@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
@@ -10,20 +11,22 @@ namespace Twipe.Core.Internals
 {
     public class CharacterBitmapGenerator : BitmapGeneratorBase<Character>
     {
-        private Task worker;
-        private BitmapData resultData;
         private int bytesPerPixel;
         private int heightInPixels;
         private int widthInBytes;
-        private StringBuilder sb;
-        private IDictionary<int, Bitmap> tileCache;
-        private Brush blackBrush;
-        private Brush whiteBrush;
         private int tileSize;
         private int numberOfTotalTiles;
         private int numberOfTilesProcessed;
+        private bool useColoredTiles;
+        private Task worker;
+        private BitmapData resultData;
+        private StringBuilder sb;
+        private IDictionary<int, Bitmap> tileCache;
+        private Brush foregraoundBrush;
+        private Brush backgroundBrush;
         private Point startingPointZero;
         private Rectangle tileRectangle;
+        private Action<Graphics, Character> CreateTile;
 
         private unsafe byte* FirstPixelPointer { get; set; }
 
@@ -33,11 +36,31 @@ namespace Twipe.Core.Internals
             numberOfTilesProcessed = 0;
             sb = new StringBuilder();
             tileCache = new Dictionary<int, Bitmap>();
-            blackBrush = Brushes.Black;
-            whiteBrush = Brushes.White;
+            foregraoundBrush = Brushes.Black;
+            backgroundBrush = Brushes.White;
             tileSize = input.TileSize;
             startingPointZero = new Point(0, 0);
             tileRectangle = new Rectangle(0, 0, tileSize, tileSize);
+            useColoredTiles = false;
+            CreateTile = this.CreatePlainTile;
+        }
+
+        public bool UseColoredTiles
+        {
+            get
+            {
+                return useColoredTiles;
+            }
+
+            set
+            {
+                useColoredTiles = value;
+
+                if (value)
+                    CreateTile = CreateColoredTile;
+                else
+                    CreateTile = CreatePlainTile;
+            }
         }
 
         public override async Task<Bitmap> GenerateImageAsync()
@@ -97,6 +120,17 @@ namespace Twipe.Core.Internals
                 b.Dispose();
         }
 
+        private void CreateColoredTile(Graphics g, Character c)
+        {
+            g.FillRectangle(backgroundBrush, tileRectangle);
+            g.DrawString(c.Value.ToString(), c.Font, foregraoundBrush, startingPointZero);
+        }
+
+        private void CreatePlainTile(Graphics g, Character c)
+        {
+            g.DrawString(c.Value.ToString(), c.Font, foregraoundBrush, startingPointZero);
+        }
+
         private Bitmap GetImageFor(Character c)
         {
             int key = c.GetHashCode();
@@ -107,8 +141,8 @@ namespace Twipe.Core.Internals
 
             using (Graphics g = Graphics.FromImage(image))
             {
-                g.FillRectangle(whiteBrush, tileRectangle);
-                g.DrawString(c.Value.ToString(), c.Font, blackBrush, startingPointZero);
+                //CreateTile(g, c);
+                g.DrawString(c.Value.ToString(), c.Font, foregraoundBrush, startingPointZero);
             }
 
             return image;

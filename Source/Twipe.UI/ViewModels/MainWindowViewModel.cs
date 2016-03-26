@@ -36,7 +36,7 @@ namespace Twipe.UI.ViewModels
             hasConverted = false;
             canBrowse = true;
             canSave = false;
-            tempFileName = System.IO.Path.GetTempPath() + "temp_image.jpg";
+            tempFileName = System.IO.Path.GetTempPath() + "temp_image.png";
             statusMessage = "Ready";
             isProgressShown = false;
         }
@@ -154,6 +154,7 @@ namespace Twipe.UI.ViewModels
             CharacterBitmapGenerator generator = new CharacterBitmapGenerator(manager.Result);
             generator.ProgressChanged += ProgressChangedHandler;
             generator.Completed += CompletedHandler;
+            generator.UseColoredTiles = CurrentSettingViewModel.UseColoredTiles;
             Bitmap image = await generator.GenerateImageAsync();
             image.Save(tempFileName);
             image.Dispose();
