@@ -37,7 +37,7 @@ namespace Twipe.UI.Common
         {
             // copy source file to a temp file to avoid conflict
             string tempFile = Path.GetTempPath() + "saveTempFile";
-            File.Copy(source, tempFile);
+            File.Copy(source, tempFile, true);
             OnProgressChanged(20);
 
             Bitmap tempBitmap = new Bitmap(tempFile);
