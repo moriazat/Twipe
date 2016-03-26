@@ -8,11 +8,15 @@ namespace Twipe.Core.Internals
 {
     public class CharactersRatioCaculator : ICharacterRatioCalculator
     {
+        private int tileSize;
+        private readonly string WidestCharacter = "W";
         private FontFamily[] fontFamilies;
         private IPixelIdentifier algorithm;
-        private int tileSize;
         private List<SubstitutionItem<Character>> ratios;
-        private readonly string WidestCharacter = "W";
+        private Brush whiteBrush;
+        private Brush blackBrush;
+        private Point zeroStartingPoint;
+        private Rectangle tileRectangle;
 
         public event EventHandler<ProgressEventArgs> ProgressChanged;
 
@@ -22,6 +26,9 @@ namespace Twipe.Core.Internals
         {
             ratios = new List<SubstitutionItem<Character>>();
             algorithm = pixelIdentifier;
+            whiteBrush = Brushes.White;
+            blackBrush = Brushes.Black;
+            zeroStartingPoint = new Point(0, 0);
         }
 
         public FontFamily[] FontFamilies
@@ -47,6 +54,8 @@ namespace Twipe.Core.Internals
         {
             List<SubstitutionItem<Character>> ratiosList;
             int fontsCount = fontFamilies.Length;
+
+            this.tileRectangle = new Rectangle(0, 0, tileSize, tileSize);
 
             for (int i = 0; i < fontsCount; i++)
             {
@@ -179,8 +188,8 @@ namespace Twipe.Core.Internals
 
             using (Graphics g = Graphics.FromImage(image))
             {
-                g.FillRectangle(Brushes.White, new Rectangle(0, 0, tileSize, tileSize));
-                g.DrawString(c.ToString(), font, Brushes.Black, new Point(0, 0));
+                g.FillRectangle(whiteBrush, tileRectangle);
+                g.DrawString(c.ToString(), font, blackBrush, zeroStartingPoint);
             }
 
             return image;

@@ -10,15 +10,19 @@ namespace Twipe.Core.Internals
 
         public override void IdentifyPixels()
         {
-            BitmapData imageData = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, image.PixelFormat);
+            BitmapData imageData = image.LockBits(new Rectangle(0, 0, image.Width, image.Height),
+                                                  ImageLockMode.ReadOnly, image.PixelFormat);
+
+            int imageWidth = image.Width;
+            int imageHeight = image.Height;
 
             unsafe
             {
                 CurrentBytePointer = (byte*)imageData.Scan0;
 
-                for (int y = 0; y < image.Height; y++)
+                for (int y = 0; y < imageHeight; y++)
                 {
-                    for (int x = 0; x < image.Width; x++)
+                    for (int x = 0; x < imageWidth; x++)
                     {
                         if (IsCurrentPixelWhite())
                             whites++;
