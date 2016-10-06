@@ -2,4 +2,4 @@
 
 
 # Twipe
-It is a desktop application for creating visually-competing ASCII-Art equivalent of a given image. 
+It is a desktop application for creating visually-competing ASCII-Art equivalent of a given image. Visit the project homepage for more info: [moriazat.github.io/Twipe](https://moriazat.github.io/Twipe/)
